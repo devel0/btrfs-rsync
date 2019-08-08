@@ -147,8 +147,13 @@ namespace btrfs_rsync
                         foreach (var (child, idx, isLast) in entry.Children.OrderBy(w => w.GenAtCreation).WithIndexIsLast())
                         {
                             var childCounterPart = child.CounterPart(TargetPath);
+                            var childCounterPartExists = Directory.Exists(childCounterPart);
 
-                            if (entry.Parent == null || !Directory.Exists(childCounterPart))
+                            if (childCounterPartExists)
+                            {
+                                workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.rsync, child.Fullpath, childCounterPart));
+                            }
+                            else if (entry.Parent == null)
                             {
                                 workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.rsync, child.Fullpath, entryCounterPart));
                                 workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.snap, entryCounterPart, childCounterPart));

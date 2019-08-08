@@ -13,7 +13,7 @@
             "args": [
                 "--dry-run",
                 "/disk-4tb",
-                "/disk-4tb-bk2"
+                "/disk-4tb-bk"
             ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
