@@ -11,18 +11,23 @@ namespace btrfs_rsync
     public static partial class Toolkit
     {
 
+        public static async Task<(int exitcode, string output, string error)> ExecNoRedirect(string cmd,
+            IEnumerable<string> args, CancellationToken ct, bool sudo = false) =>
+            await Exec(cmd, args, ct, sudo, false, false);
+
         /// <summary>
         /// start a process in background redirecting standard output, error;
         /// a cancellation token can be supplied to cancel underlying process
         /// </summary>        
-        public static Task<(int exitcode, string stdout, string stderr)> Exec(string cmd, IEnumerable<string> args, CancellationToken ct, bool sudo = false)
+        public static async Task<(int exitcode, string output, string error)> Exec(string cmd,
+            IEnumerable<string> args, CancellationToken ct, bool sudo = false, bool redirectStdout = true, bool redirectStderr = true)
         {
-            var task = Task<(int exitcode, string stdout, string stderr)>.Run(() =>
+            var res = await Task<(int exitcode, string output, string error)>.Run(() =>
             {
                 var p = new Process();
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.UseShellExecute = !redirectStdout && !redirectStderr;
+                p.StartInfo.RedirectStandardOutput = redirectStdout;
+                p.StartInfo.RedirectStandardError = redirectStderr;
                 if (sudo)
                 {
                     p.StartInfo.FileName = "sudo";
@@ -35,20 +40,26 @@ namespace btrfs_rsync
                 var sbOut = new StringBuilder();
                 var sbErr = new StringBuilder();
 
-                p.OutputDataReceived += (s, e) =>
+                if (redirectStdout)
                 {
-                    sbOut.AppendLine(e.Data);
-                };
+                    p.OutputDataReceived += (s, e) =>
+                    {
+                        sbOut.AppendLine(e.Data);
+                    };
+                }
 
-                p.ErrorDataReceived += (s, e) =>
+                if (redirectStderr)
                 {
-                    sbErr.AppendLine(e.Data);
-                };
+                    p.ErrorDataReceived += (s, e) =>
+                    {
+                        sbErr.AppendLine(e.Data);
+                    };
+                }
 
                 if (!p.Start()) throw new Exception($"can't run process");
 
-                p.BeginOutputReadLine();
-                p.BeginErrorReadLine();
+                if (redirectStdout) p.BeginOutputReadLine();
+                if (redirectStderr) p.BeginErrorReadLine();
 
                 while (!ct.IsCancellationRequested)
                 {
@@ -58,12 +69,15 @@ namespace btrfs_rsync
                 {
                     System.Console.WriteLine($"cancel requested");
                     p.Kill();
-                }                
+                }
+
+                if (redirectStdout) p.CancelOutputRead();
+                if (redirectStderr) p.CancelErrorRead();
 
                 return (p.ExitCode, sbOut.ToString(), sbErr.ToString());
             });
 
-            return task;
+            return res;
         }
 
 

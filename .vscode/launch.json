@@ -9,17 +9,18 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/btrfs-rsync.dll",
-            "args": [                
-                "--dry-run=true",
+            "program": "${workspaceFolder}/btrfs-rsync/bin/Debug/netcoreapp3.0/btrfs-rsync.dll",
+            "args": [
+                "--dry-run",
                 "/disk-4tb",
-                "/disk-4tb-bk"
+                "/disk-4tb-bk2"
             ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false,
-            "env": {                
+            "env": {
+                "BTRFS_RSYNC_ENVIRONMENT": "Development"
             }
         },
         {

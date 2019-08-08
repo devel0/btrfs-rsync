@@ -75,6 +75,8 @@ SOURCE and TARGET must mounted btrfs filesystem path.");
                 return false;
             }
 
+            RunMode = RunMode.normal;
+
             foreach (var opt in options)
             {
                 if (opt == "--dry-run")

@@ -1,13 +1,17 @@
-﻿namespace btrfs_rsync
+﻿using System;
+
+namespace btrfs_rsync
 {
     class Program
     {
 
         static void Main(string[] args)
         {
-            var tool = new Tool();
+            var env = Environment.GetEnvironmentVariable("BTRFS_RSYNC_ENVIRONMENT");
 
-            tool.Run(args).Wait();            
+            var tool = new Tool(env != null && env == "Development");
+
+            tool.Run(args).Wait();
         }
 
     }
