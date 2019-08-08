@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using SearchAThing;
 using System.Linq;
+using SearchAThing.Util;
+using Path = System.IO.Path;
 
 namespace btrfs_rsync
 {
