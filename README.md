@@ -4,6 +4,8 @@
 
 BTRFS Rsync
 
+Create copy of btrfs filesystem through rsync and btrfs sub
+
 - [Quickstart](#quickstart)
 - [command line](#command-line)
 - [test](#test)
@@ -57,7 +59,7 @@ SOURCE and TARGET must mounted btrfs filesystem path.
 ## how does it work
 
 - using `--dry-run` backup approach can be viewed
-- relevant code here
+- relevant code [here](https://github.com/devel0/btrfs-rsync/blob/c5cd650cf5f5fde6b34f915e39bbb0044a75fa5c/btrfs-rsync/Tool.cs#L129-L171)
 
 ## test
 
