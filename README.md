@@ -4,8 +4,6 @@
 
 BTRFS Rsync
 
-Create copy of btrfs filesystem through rsync and btrfs sub
-
 - [Quickstart](#quickstart)
 - [command line](#command-line)
 - [test](#test)
