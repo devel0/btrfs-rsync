@@ -45,23 +45,24 @@ SOURCE and TARGET must mounted btrfs filesystem path.
 
  Mandatory:
 
-  SOURCE        source path
-  TARGET        target path
+  SOURCE                source path
+  TARGET                target path
 
  Optional:
 
-  --dry-run     list sync actions without apply (simulation mode)
+  --dry-run             list sync actions without apply (simulation mode)
+  --skip-snap-resync    avoid resync existing subvolume snapshots
 
 ```
 
 ## how does it work
 
 - using `--dry-run` backup approach can be viewed
-- relevant code [here](https://github.com/devel0/btrfs-rsync/blob/c5cd650cf5f5fde6b34f915e39bbb0044a75fa5c/btrfs-rsync/Tool.cs#L129-L171)
+- relevant code [here](https://github.com/devel0/btrfs-rsync/blob/864a5450fd3e24b0c9c7c886f2ccf0c5c69c3896/btrfs-rsync/Tool.cs#L131-L179)
 
 ## test
 
-Before to run execution commands that will be done can be inspected using `--dry-run` switch
+- Before to run execution commands that will be done can be inspected using `--dry-run` switch
 
 ```sh
 devel0@main:~$ btrfs-rsync --dry-run /disk-4tb /disk-4tb-bk2
@@ -188,6 +189,33 @@ btrfs sub create /disk-4tb-bk2/backup/vms/current
 rsync -Aav --delete /disk-4tb/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01/ /disk-4tb-bk2/backup/vms/current/
 btrfs sub snap /disk-4tb-bk2/backup/vms/current /disk-4tb-bk2/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01
 rsync -Aav --delete --exclude=/disk-4tb-bk2/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01 /disk-4tb/backup/vms/current/ /disk-4tb-bk2/backup/vms/current/
+```
+
+- a second run will only synchronize volumes
+
+```sh
+==============================================================================
+RUNNING
+==============================================================================
+rsync -Aav --delete /disk-4tb/backup/data/@GMT-2017.10.08-19.29.07/ /disk-4tb-bk/backup/data/@GMT-2017.10.08-19.29.07/
+rsync -Aav --delete /disk-4tb/backup/data/@GMT-2018.05.04-17.29.20-ARCHIVED-N01/ /disk-4tb-bk/backup/data/@GMT-2018.05.04-17.29.20-ARCHIVED-N01/
+rsync -Aav --delete /disk-4tb/backup/data/@GMT-2018.09.04-21.29.13-ARCHIVED-N02/ /disk-4tb-bk/backup/data/@GMT-2018.09.04-21.29.13-ARCHIVED-N02/
+rsync -Aav --delete /disk-4tb/backup/data/@GMT-2019.08.03-09.58.00-ARCHIVED-N03/ /disk-4tb-bk/backup/data/@GMT-2019.08.03-09.58.00-ARCHIVED-N03/
+rsync -Aav --delete --exclude=/disk-4tb-bk/backup/data/@GMT-2017.10.08-19.29.07 --exclude=/disk-4tb-bk/backup/data/@GMT-2018.05.04-17.29.20-ARCHIVED-N01 --exclude=/disk-4tb-bk/backup/data/@GMT-2018.09.04-21.29.13-ARCHIVED-N02 --exclude=/disk-4tb-bk/backup/data/@GMT-2019.08.03-09.58.00-ARCHIVED-N03 /disk-4tb/backup/data/current/ /disk-4tb-bk/backup/data/current/
+rsync -Aav --delete /disk-4tb/binshare/ /disk-4tb-bk/binshare/
+rsync -Aav --delete /disk-4tb/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01/ /disk-4tb-bk/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01/
+rsync -Aav --delete --exclude=/disk-4tb-bk/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01 /disk-4tb/backup/vms/current/ /disk-4tb-bk/backup/vms/current/
+```
+
+- option `--skip-sub-resync` can be specified to avoid resynchronized snapshotted subvolumes
+
+```
+==============================================================================
+RUNNING
+==============================================================================
+rsync -Aav --delete --exclude=/disk-4tb-bk/backup/data/@GMT-2017.10.08-19.29.07 --exclude=/disk-4tb-bk/backup/data/@GMT-2018.05.04-17.29.20-ARCHIVED-N01 --exclude=/disk-4tb-bk/backup/data/@GMT-2018.09.04-21.29.13-ARCHIVED-N02 --exclude=/disk-4tb-bk/backup/data/@GMT-2019.08.03-09.58.00-ARCHIVED-N03 /disk-4tb/backup/data/current/ /disk-4tb-bk/backup/data/current/
+rsync -Aav --delete /disk-4tb/binshare/ /disk-4tb-bk/binshare/
+rsync -Aav --delete --exclude=/disk-4tb-bk/backup/vms/@GMT-2019.08.04-12.53.58-ARCHIVED-N01 /disk-4tb/backup/vms/current/ /disk-4tb-bk/backup/vms/current/
 ```
 
 ## How this project was built

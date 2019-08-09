@@ -12,6 +12,7 @@
             "program": "${workspaceFolder}/btrfs-rsync/bin/Debug/netcoreapp3.0/btrfs-rsync.dll",
             "args": [
                 "--dry-run",
+                "--skip-snap-resync",
                 "/disk-4tb",
                 "/disk-4tb-bk"
             ],
