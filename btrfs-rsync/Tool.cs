@@ -153,7 +153,8 @@ namespace btrfs_rsync
 
                             if (childCounterPartExists)
                             {
-                                workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.rsync, child.Fullpath, childCounterPart));
+                                if (!SkipSubVolResync)
+                                    workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.rsync, child.Fullpath, childCounterPart));
                             }
                             else if (entry.Parent == null)
                             {

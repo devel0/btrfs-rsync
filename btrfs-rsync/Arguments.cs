@@ -31,12 +31,13 @@ SOURCE and TARGET must mounted btrfs filesystem path.");
             Console.WriteLine($@"
  Mandatory:
 
-  SOURCE        source path
-  TARGET        target path
+  SOURCE                source path
+  TARGET                target path
 
  Optional:
 
-  --dry-run     list sync actions without apply (simulation mode)
+  --dry-run             list sync actions without apply (simulation mode)
+  --skip-snap-resync    avoid resync existing subvolume snapshots
 ");
         }
 
@@ -45,6 +46,8 @@ SOURCE and TARGET must mounted btrfs filesystem path.");
         string TargetPath { get; set; }
 
         RunMode RunMode { get; set; }
+
+        bool SkipSubVolResync { get; set; }
 
         /// <summary>
         /// check command line arguments
@@ -81,12 +84,14 @@ SOURCE and TARGET must mounted btrfs filesystem path.");
             {
                 if (opt == "--dry-run")
                     RunMode = RunMode.dryRun;
+                else if (opt == "--skip-snap-resync")
+                    SkipSubVolResync = true;
                 else
                 {
                     PrintErr($"unknown given option [{opt}]");
                     return false;
                 }
-            }             
+            }
 
             return true;
         }
