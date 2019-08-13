@@ -9,6 +9,7 @@ BTRFS Rsync
 - [command line](#command-line)
 - [test](#test)
 - [How this project was built](#how-this-project-was-built)
+- [license scan](#license-scan)
 
 <hr/>
 
