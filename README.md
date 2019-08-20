@@ -1,7 +1,6 @@
 # btrfs-rsync
 
 [![NuGet Badge](https://buildstats.info/nuget/btrfs-rsync)](https://www.nuget.org/packages/btrfs-rsync/)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdevel0%2Fbtrfs-rsync.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdevel0%2Fbtrfs-rsync?ref=badge_shield)
 
 BTRFS Rsync
 
@@ -9,7 +8,6 @@ BTRFS Rsync
 - [command line](#command-line)
 - [test](#test)
 - [How this project was built](#how-this-project-was-built)
-- [license scan](#license-scan)
 
 <hr/>
 
@@ -237,7 +235,3 @@ dotnet sln btrfs-rsync.sln add btrfs-rsync/btrfs-rsync.csproj
 dotnet build
 dotnet run --project btrfs-rsync
 ```
-
-## license scan
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdevel0%2Fbtrfs-rsync.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdevel0%2Fbtrfs-rsync?ref=badge_large)
