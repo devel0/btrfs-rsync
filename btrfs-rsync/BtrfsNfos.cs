@@ -33,11 +33,13 @@ namespace btrfs_rsync
         /// </summary>
         public BtrfsNfo GetParent(string uuid)
         {
+            BtrfsNfo res = null;
+
             var nfo = btrfsNfoDict[uuid];
             if (!UUIDIsNull(nfo.ParentUUID))
-                return btrfsNfoDict[nfo.ParentUUID];
-            else
-                return null;
+                btrfsNfoDict.TryGetValue(nfo.ParentUUID, out res);
+
+            return res;
         }
 
         /// <summary>
