@@ -11,7 +11,7 @@ namespace btrfs_rsync
 
             var tool = new Tool(env != null && env == "Development");
 
-            tool.Run(args).Wait();
+            tool.Run(args);
         }
 
     }

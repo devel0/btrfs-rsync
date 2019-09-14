@@ -18,6 +18,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="netcore-util" Version="1.0.10" />
+        <PackageReference Include="netcore-cmdline" Version="0.2.1" />
+        <PackageReference Include="netcore-util" Version="1.0.32" />
     </ItemGroup>
 </Project>
