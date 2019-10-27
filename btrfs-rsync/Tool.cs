@@ -87,8 +87,22 @@ namespace btrfs_rsync
         }
 
         #region RunIt
-        async Task RunIt(RunMode RunMode, string SourcePath, string TargetPath, bool SkipSubVolResync)
+        async Task RunIt(RunMode RunMode, string SourcePath, string TargetPath, bool SkipSubVolResync, bool skipDeleteSubvol)
         {
+            if (!Directory.Exists(SourcePath))
+            {
+                System.Console.WriteLine($"Source path [{SourcePath}] not found");
+                Environment.Exit(1);
+                return;
+            }
+
+            if (!Directory.Exists(TargetPath))
+            {
+                System.Console.WriteLine($"Target path [{TargetPath}] not found");
+                Environment.Exit(1);
+                return;
+            }
+
             var srcNfos = await ReadBtrfsNfo(SourcePath);
             var dstNfos = await ReadBtrfsNfo(TargetPath);
 
@@ -196,13 +210,17 @@ namespace btrfs_rsync
 
                 if (!Directory.Exists(entryCounterPart))
                 {
+                    System.Console.WriteLine($"---> entr:[{entry}] counterpart [{entryCounterPart}]");
                     workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.deleteSubvol, null, entry.Fullpath));
                 }
             };
 
-            foreach (var entry in dstNfos.Entries)//.Where(r => r.Parent == null))
+            if (!skipDeleteSubvol)
             {
-                planWorkActFromDestNfos(entry);
+                foreach (var entry in dstNfos.Entries)//.Where(r => r.Parent == null))
+                {
+                    planWorkActFromDestNfos(entry);
+                }
             }
             #endregion
 
@@ -328,8 +346,11 @@ namespace btrfs_rsync
 
             CmdlineParser.Create("Synchronize btrfs SOURCE filesystem with given TARGET.", (parser) =>
             {
+                parser.AddShortLong("h", "help", "show usage", null, (item) => item.MatchParser.PrintUsage());
+
                 var dryRunMode = parser.AddShortLong("u", "dry-run", "list sync actions without apply (simulation mode)");
                 var skipSnapResync = parser.AddShortLong("n", "skip-snap-resync", "avoid resync existing subvolume snapshots");
+                var skipDeleteSubvol = parser.AddShortLong("s", "skip-del-subvol", "avoid to remove destination subvol not present in source");
 
                 var SourcePath = parser.AddMandatoryParameter("source", "source path");
                 var TargetPath = parser.AddMandatoryParameter("target", "target path");
@@ -341,7 +362,7 @@ namespace btrfs_rsync
                         var runMode = RunMode.normal;
                         if (dryRunMode) runMode = RunMode.dryRun;
 
-                        await RunIt(runMode, SourcePath, TargetPath, skipSnapResync);
+                        await RunIt(runMode, SourcePath, TargetPath, skipSnapResync, skipDeleteSubvol);
                     }).Wait();
                 });
 
