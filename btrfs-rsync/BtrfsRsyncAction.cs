@@ -20,6 +20,10 @@ namespace btrfs_rsync
         /// </summary>
         createSubvol,
         /// <summary>
+        /// delete subvol
+        /// </summary>
+        deleteSubvol,
+        /// <summary>
         /// ensure directories
         /// </summary>
         ensurePath
@@ -48,7 +52,7 @@ namespace btrfs_rsync
 
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder();            
 
             sb.Append($"{Mode}: {SourcePath} -> {DestPath}");
 

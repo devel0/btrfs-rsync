@@ -11,11 +11,6 @@ BTRFS Rsync
 
 <hr/>
 
-## TODO
-
-missing features ( planned for future release )
-- deletion of subVol from target when not present in source
-
 ## Quickstart
 
 - Requirements: [Download NET Core SDK](https://dotnet.microsoft.com/download)

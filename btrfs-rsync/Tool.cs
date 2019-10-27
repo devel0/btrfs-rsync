@@ -61,27 +61,36 @@ namespace btrfs_rsync
         }
         #endregion
 
+        async Task<BtrfsNfos> ReadBtrfsNfo(string path)
+        {
+            var nfos = new BtrfsNfos();
+
+            {
+                var res = await Toolkit.Exec("btrfs", new[] { "sub", "list", path }, ct, development);
+
+                foreach (var x in res.output.Lines())
+                {
+                    var q = x.IndexOf("path ");
+                    if (q != -1)
+                    {
+                        var relpath = x.Substring(q + "path ".Length);
+                        var subvolFullpath = Path.Combine(path, relpath);
+
+                        var subvolInfo = await GetSubVolumeInfo(path, subvolFullpath, ct);
+
+                        nfos.Add(path, relpath, subvolInfo.uuid, subvolInfo.parentUUID, subvolInfo.generation, subvolInfo.genAtCreation);
+                    }
+                }
+            }
+
+            return nfos;
+        }
+
         #region RunIt
         async Task RunIt(RunMode RunMode, string SourcePath, string TargetPath, bool SkipSubVolResync)
         {
-            var res = await Toolkit.Exec("btrfs", new[] { "sub", "list", SourcePath }, ct, development);
-
-            var nfos = new BtrfsNfos();
-
-            var sourcePaths = new List<string>();
-            foreach (var x in res.output.Lines())
-            {
-                var q = x.IndexOf("path ");
-                if (q != -1)
-                {
-                    var relpath = x.Substring(q + "path ".Length);
-                    var subvolFullpath = Path.Combine(SourcePath, relpath);
-
-                    var subvolInfo = await GetSubVolumeInfo(SourcePath, subvolFullpath, ct);
-
-                    nfos.Add(SourcePath, relpath, subvolInfo.uuid, subvolInfo.parentUUID, subvolInfo.generation, subvolInfo.genAtCreation);
-                }
-            }
+            var srcNfos = await ReadBtrfsNfo(SourcePath);
+            var dstNfos = await ReadBtrfsNfo(TargetPath);
 
             #region log helper
             var indent = 0;
@@ -111,7 +120,7 @@ namespace btrfs_rsync
             #endregion
 
             // log
-            foreach (var entry in nfos.Entries.Where(r => r.Parent == null))
+            foreach (var entry in srcNfos.Entries.Where(r => r.Parent == null))
             {
                 logNfo(entry);
             }
@@ -119,9 +128,10 @@ namespace btrfs_rsync
             // plan work
             var workPlan = new List<BtrfsResynActionNfo>();
 
-            Action<BtrfsNfo> planWorkAct = null;
+            #region plan work actions from source nfos
+            Action<BtrfsNfo> planWorkActFromSourceNfos = null;
 
-            planWorkAct = (entry) =>
+            planWorkActFromSourceNfos = (entry) =>
             {
                 var entryCounterPart = entry.CounterPart(TargetPath);
 
@@ -156,7 +166,7 @@ namespace btrfs_rsync
                         }
 
                         if (child.Children.Any())
-                            planWorkAct(child);
+                            planWorkActFromSourceNfos(child);
 
                         if (isLast)
                         {
@@ -171,10 +181,30 @@ namespace btrfs_rsync
                 }
             };
 
-            foreach (var entry in nfos.Entries.Where(r => r.Parent == null))
+            foreach (var entry in srcNfos.Entries.Where(r => r.Parent == null))
             {
-                planWorkAct(entry);
+                planWorkActFromSourceNfos(entry);
             }
+            #endregion
+
+            #region plan work actions from dest nfos
+            Action<BtrfsNfo> planWorkActFromDestNfos = null;
+
+            planWorkActFromDestNfos = (entry) =>
+            {
+                var entryCounterPart = entry.CounterPart(SourcePath);
+
+                if (!Directory.Exists(entryCounterPart))
+                {
+                    workPlan.Add(new BtrfsResynActionNfo(BtrfsRsyncActionMode.deleteSubvol, null, entry.Fullpath));
+                }
+            };
+
+            foreach (var entry in dstNfos.Entries)//.Where(r => r.Parent == null))
+            {
+                planWorkActFromDestNfos(entry);
+            }
+            #endregion
 
             #region log workplane
             {
@@ -223,6 +253,19 @@ namespace btrfs_rsync
                         {
                             var cmdprog = "btrfs";
                             var cmdargs = new List<string>() { "sub", "create", wp.DestPath };
+                            if (RunMode == RunMode.dryRun)
+                                dryRunProg(cmdprog, cmdargs);
+                            else
+                            {
+                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                            }
+                        }
+                        break;
+
+                    case BtrfsRsyncActionMode.deleteSubvol:
+                        {
+                            var cmdprog = "btrfs";
+                            var cmdargs = new List<string>() { "sub", "delete", wp.DestPath };
                             if (RunMode == RunMode.dryRun)
                                 dryRunProg(cmdprog, cmdargs);
                             else
