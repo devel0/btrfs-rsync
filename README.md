@@ -17,12 +17,6 @@ BTRFS Rsync
 - Install the tool:
 
 ```sh
-dotnet tool install -g btrfs-rsync
-```
-
-- To update if already installed:
-
-```sh
 dotnet tool update -g btrfs-rsync
 ```
 
