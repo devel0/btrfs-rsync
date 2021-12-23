@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using SearchAThing;
 using System.Linq;
-using SearchAThing.Util;
 using Path = System.IO.Path;
 
 namespace btrfs_rsync
@@ -31,7 +30,7 @@ namespace btrfs_rsync
         async Task<(string uuid, string parentUUID, long generation, long genAtCreation, List<string> snapshots)>
             GetSubVolumeInfo(string SourcePath, string fullpath, CancellationToken ct)
         {
-            var res = await Toolkit.Exec("btrfs", new[] { "sub", "show", fullpath }, ct, development);
+            var res = await UtilToolkit.Exec("btrfs", new[] { "sub", "show", fullpath }, ct, development);
 
             var uuid = "";
             var parentUUID = "";
@@ -39,7 +38,7 @@ namespace btrfs_rsync
             var genAtCreation = 0L;
             List<string> Snapshots = null;
 
-            foreach (var y in res.output.Lines())
+            foreach (var y in res.Output.Lines())
             {
                 if (y.Trim().StartsWith("UUID:"))
                     uuid = y.Trim().StripBegin("UUID:").Trim();
@@ -66,9 +65,9 @@ namespace btrfs_rsync
             var nfos = new BtrfsNfos();
 
             {
-                var res = await Toolkit.Exec("btrfs", new[] { "sub", "list", path }, ct, development);
+                var res = await UtilToolkit.Exec("btrfs", new[] { "sub", "list", path }, ct, development);
 
-                foreach (var x in res.output.Lines())
+                foreach (var x in res.Output.Lines())
                 {
                     var q = x.IndexOf("path ");
                     if (q != -1)
@@ -262,7 +261,7 @@ namespace btrfs_rsync
                                 dryRunProg(cmdprog, cmdargs);
                             else
                             {
-                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                                var cmdres = await UtilToolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
                             }
                         }
                         break;
@@ -275,7 +274,7 @@ namespace btrfs_rsync
                                 dryRunProg(cmdprog, cmdargs);
                             else
                             {
-                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                                var cmdres = await UtilToolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
                             }
                         }
                         break;
@@ -288,7 +287,7 @@ namespace btrfs_rsync
                                 dryRunProg(cmdprog, cmdargs);
                             else
                             {
-                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                                var cmdres = await UtilToolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
                             }
                         }
                         break;
@@ -309,7 +308,7 @@ namespace btrfs_rsync
                                 dryRunProg(cmdprog, cmdargs);
                             else
                             {
-                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                                var cmdres = await UtilToolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
                             }
                         }
                         break;
@@ -322,7 +321,7 @@ namespace btrfs_rsync
                                 dryRunProg(cmdprog, cmdargs);
                             else
                             {
-                                var cmdres = await Toolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
+                                var cmdres = await UtilToolkit.ExecNoRedirect(cmdprog, cmdargs, ct, development);
                             }
                         }
                         break;
